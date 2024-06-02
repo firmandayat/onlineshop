@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Product;
 
 use App\Product;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,6 +12,7 @@ class Index extends Component
     public $paginate = 10;
     public $search;
     public $formVisible;
+    public $formUpdate = false;
 
     use WithPagination;
 
@@ -22,7 +24,7 @@ class Index extends Component
     protected $listeners = [
         'formClose' => 'formCloseHandler',
         'productStored' => 'productStoredHandler',
-        // 'productUpdated' => 'productUpdatedHandler'
+        'productUpdated' => 'productUpdatedHandler'
     ];
 
     protected $updatesQueryString = [
@@ -48,6 +50,31 @@ class Index extends Component
     public function productStoredHandler(){
         $this->formVisible = false;
         session()->flash('message', 'Your product was stored');
+    }
+
+    public function editProduct($productId){
+        $this->formUpdate=true;
+        $this->formVisible=true;
+        $product = Product::find($productId);
+        $this->emit('editProduct', $product);
+    }
+
+    public function productUpdatedHandler()
+    {
+        $this->formVisible = false;
+        session()->flash('message', 'Your product was updated');
+    }
+
+    public function deleteProduct($productId)
+    {
+        $product = Product::find($productId);
+
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        $product->delete();
+        session()->flash('message', 'Product was deleted!');
     }
 
 }

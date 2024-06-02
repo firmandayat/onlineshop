@@ -2,17 +2,22 @@
 <div class="container">
 
     @if ($formVisible)
-    @livewire('product.create')
+        @if (!$formUpdate)
+            @livewire('product.create')
+        @else
+            @livewire('product.update')
+        @endif
     @endif
 
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Product 
-                    <button wire:click="$toggle('formVisible')" class="btn btn-sm btn-primary">Create</button></div>
+                <div class="card-header">Product
+                    <button wire:click="$toggle('formVisible')" class="btn btn-sm btn-primary">Create</button>
+                </div>
                 <div class="card-body">
 
-                       @if (session()->has('message'))
+                    @if (session()->has('message'))
                         <div class="alert alert-success">
                             {{ session('message') }}
                         </div>
@@ -52,8 +57,10 @@
                                     <td>{{ $product->title }}</td>
                                     <td>Rp{{ number_format($product->price, 2, ',', '.') }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-info text-white">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                        <button wire:click="editProduct({{ $product->id }})"
+                                            class="btn btn-sm btn-info text-white">Edit</button>
+                                        <button onclick="deleteProduct({{ $product->id }})"
+                                            class="btn btn-sm btn-danger">Delete</button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -65,3 +72,11 @@
         </div>
     </div>
 </div>
+
+<script>
+    function deleteProduct(productId) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            @this.call('deleteProduct', productId);
+        }
+    }
+</script>
